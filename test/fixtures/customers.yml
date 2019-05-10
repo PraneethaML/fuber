@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  cab_id: MyString
+  pink_preference: false
+  src_lat: 1
+  src_long: 1
+  dest_lat: 1
+  dest_long: 1
+
+two:
+  cab_id: MyString
+  pink_preference: false
+  src_lat: 1
+  src_long: 1
+  dest_lat: 1
+  dest_long: 1
