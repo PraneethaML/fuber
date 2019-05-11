@@ -121,7 +121,7 @@ class FuberController < ApplicationController
 		end
 	end
 
-	def get_fare
+	def getFare
 		if(params.has_key?(:ride_id))
 			ride = Ride.find_by(:ride_id)
 			if ride.nil?	
@@ -129,6 +129,15 @@ class FuberController < ApplicationController
 			else
 				distance_covered = ride.dist_travelled
 				time_taken = ((ride.ride_end_time - ride.ride_start_time)/60).to_i
+				pink_pref = Ride.pink_pref
+				fare = 0
+				if pink_pref
+				 	# 1 dogecoin per minute, and 2 dogecoin per kilometer. Pink cars cost an additional 5 dogecoin.
+					fare = (time_taken * 1) + (distance_covered * 2) + 5
+				else
+					fare = (time_taken * 1) + (distance_covered * 2)
+				end 
+				render json: '{"message" => "You owe #{fare} dogecoins"}', status: :ok
 			end
 		else
 			render json: '{"message" => "Sorry! Unable to calculate the error."}', status: :unprocessable_entity
