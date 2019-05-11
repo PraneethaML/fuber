@@ -1,33 +1,40 @@
 class FuberController < ApplicationController
 	protect_from_forgery with: :null_session
 
+	def getAvailableCabs
+		cabs = Cab.where(:is_available => true)
+		total_available_cabs = cabs.count
+		cab_ids = cabs.pluck(:id)
+		render json: {"message" => "#{total_available_cabs} found near you", "cab_ids" => "#{cab_ids}"}.to_json, status: :ok
+	end
+
 	def bookCab
 		src_lat = params[:src_lat]
 		src_long = params[:src_long]
 		dest_lat = params[:dest_lat]
 		dest_long = params[:dest_long]
 		pink_pref = params[:pink_pref]
+		
 
 		if pink_pref
 			isPinkCabAvailable = checkPinkCabsAvailability
 			if isPinkCabAvailable
-				assigned_cab = getClosestPinkCab(src_lat, src_long)
-				render json: '{"message" => "success! cab assigned id #{assigned_cab}" assigned_cab}', status: :ok
+				assigned_cab = getClosestPinkCab(src_lat, src_long)	
+				render json: {"message" => "success! cab assigned", "cab_id" => "#{assigned_cab}"}.to_json, status: :ok
 			else
-				render json: "{sorry couldn't find cab}", status: :unprocessable_entity
+				render json: {"message" => "sorry couldn't find cab"}.to_json, status: :unprocessable_entity
 			end
 			
 		else
 			isCabAvailable = checkCabsAvailability
 			if isCabAvailable
 				assigned_cab = getClosestCab(src_lat, src_long)
-				render json: "{success! assigned cab id}: #{assigned_cab}", status: :ok		
+				render json: {"message" => "success! assigned cab" , "cab_id" => "#{assigned_cab}"}.to_json, status: :ok		
 			else
-				render json: "{failure! sorry couldn't find cabs}", status: :unprocessable_entity
+				render json: {"message" => "failure! sorry couldnt find cabs"}.to_json, status: :unprocessable_entity
 			end
 		end
 	end
-
 
 	def checkPinkCabsAvailability
 		pink_cabs_count = Cab.where(:is_pink => true).count
@@ -63,73 +70,91 @@ class FuberController < ApplicationController
 	end
 
 	def acceptRide
-		cust_src_lat = params[:src_lat]
-		cust_src_long = params[:src_long]
-		cust_dest_lat = params[:dest_lat]
-		cust_dest_long = params[:dest_long]
-		cust_pink_pref = params[:pink_pref]
-		cab_id = params[:cab_id]
+		cust_src_lat = src_lat
+		cust_src_long = src_long
+		cust_dest_lat = dest_lat
+		cust_dest_long = dest_long
+		cust_pink_pref = pink_pref
+		cab_id = assigned_cab
 		customer = Customer.create!(
 			src_lat: cust_src_lat,
 			src_long: cust_src_long,
 			dest_lat: cust_dest_lat,
 			dest_long: cust_dest_long,
-			pink_preference: cust_pink_pref,
 			cab_id: cab_id
 			)
 		cab = Cab.find_by(id: cab_id)
 		cab.update_attributes!(is_available: false)
 
-		lat_diff_sq = (dest_lat.to_i - src_lat.to_i) ** 2
-		long_diff_sq = (dest_long.to_i - src_long.to_i) ** 2
+		lat_diff_sq = (cust_dest_lat.to_i - cust_src_lat.to_i) ** 2
+		long_diff_sq = (cust_dest_long.to_i - cust_src_long.to_i) ** 2
 		distance_to_cover  = Math.sqrt(lat_diff_sq + long_diff_sq)
 
-		Ride.create!(
+		ride = Ride.create!(
 			cab_id: cab.id,
 			customer_id: customer.id,
-			dist_travelled: distance_to_cover
+			dist_travelled: distance_to_cover,
 			pink_pref: cust_pink_pref
 			)
-		render json: "{going to customer location}", status: :ok
+		render json: {"message" => "going to customer location", "ride_id" => ride.id}.to_json, status: :ok
 	end
 
 	def startRide
-		if(params.has_key?(:src_lat) && params.has_key?(:src_long) && params.has_key?(:cab_id) && params.has_key?(:customer_id))
+		if(params.has_key?(:src_lat) && params.has_key?(:src_long) && params.has_key?(:ride_id) && params.has_key?(:cab_id))
 			cust_src_lat = params[:src_lat]
 			cust_src_long = params[:src_long]
+			ride_id = params[:ride_id]
 			cab_id = params[:cab_id]
-			customer_id = params[:customer_id]
-			Ride.update_attributes!(:ride_start_time) = Time.now
-			Cab.update_attributes!(lat: src_lat ,long: src_long)
-			render json: '{"message" => "Ride started!"}', status: :ok
+			
+			ride = Ride.find_by(:id => ride_id)
+
+			if ride.nil? || ride.ride_start_time != nil || ride.ride_end_time != nil
+				render json: {"message" => "Invalid ride. Please check your ride details"}.to_json, status: :unprocessable_entity
+			else
+				ride.update_attributes!(:ride_start_time => Time.now)
+				cab = Cab.find_by(:id => cab_id)
+				cab.update_attributes!(lat: cust_src_lat ,long: cust_src_long)
+				
+				render json: {"message" => "Ride started!"}.to_json, status: :ok
+			end
 		else
-			render json: '{"message" => "Sorry! Unable to start ride."}', status: :unprocessable_entity
+			render json: {"message" => "Sorry! Unable to start ride."}.to_json, status: :unprocessable_entity
 		end
 	end
 
 	def endRide
-		if(params.has_key?(:dest_lat) && params.has_key?(:dest_long) && params.has_key?(:cab_id) && params.has_key?(:customer_id))
-			cust_src_lat = params[:dest_lat]
-			cust_src_long = params[:dest_long]
+		if(params.has_key?(:dest_lat) && params.has_key?(:dest_long) && params.has_key?(:cab_id) && params.has_key?(:ride_id))
+			cust_dest_lat = params[:dest_lat]
+			cust_dest_long = params[:dest_long]
 			cab_id = params[:cab_id]
-			customer_id = params[:customer_id]
-			Ride.update_attributes!(:ride_end_time) = Time.now
-			Cab.update_attributes!(lat: dest_lat ,long: dest_long, is_available: true)
-			render json: '{"message" => "Ride ended!"}', status: :ok
+			ride_id = params[:ride_id]
+
+			ride = Ride.find_by(:id => ride_id)
+
+			if ride.nil? || ride.ride_start_time = nil || ride.ride_end_time != nil
+				render json: {"message" => "Invalid ride. Please check your ride details"}.to_json, status: :unprocessable_entity
+			else
+				ride.update_attributes!(:ride_end_time => Time.now)
+				
+				cab = Cab.find_by(:id => cab_id)
+				cab.update_attributes!(lat: cust_dest_lat ,long: cust_dest_long, is_available: true)
+				
+				render json: {"message" => "Ride ended!"}.to_json, status: :ok
+			end	
 		else
-			render json: '{"message" => "Sorry! Unable to end ride."}', status: :unprocessable_entity
+			render json: {"message" => "Sorry! Unable to end ride."}.to_json, status: :unprocessable_entity
 		end
 	end
 
 	def getFare
 		if(params.has_key?(:ride_id))
-			ride = Ride.find_by(:ride_id)
+			ride = Ride.find_by(:id => params[:ride_id])
 			if ride.nil?	
-				render json: '{"message" => "Sorry! Unable to find ride with the given id."}', status: :unprocessable_entity
+				render json: {"message" => "Sorry! Unable to find ride with the given id."}.to_json, status: :unprocessable_entity
 			else
 				distance_covered = ride.dist_travelled
 				time_taken = ((ride.ride_end_time - ride.ride_start_time)/60).to_i
-				pink_pref = Ride.pink_pref
+				pink_pref = ride.pink_pref
 				fare = 0
 				if pink_pref
 				 	# 1 dogecoin per minute, and 2 dogecoin per kilometer. Pink cars cost an additional 5 dogecoin.
@@ -137,10 +162,10 @@ class FuberController < ApplicationController
 				else
 					fare = (time_taken * 1) + (distance_covered * 2)
 				end 
-				render json: '{"message" => "You owe #{fare} dogecoins"}', status: :ok
+				render json: {"message" => "You owe #{fare} dogecoins"}.to_json, status: :ok
 			end
 		else
-			render json: '{"message" => "Sorry! Unable to calculate the error."}', status: :unprocessable_entity
+			render json: {"message" => "Sorry! Unable to calculate the error."}.to_json, status: :unprocessable_entity
 		end
 	end
 
