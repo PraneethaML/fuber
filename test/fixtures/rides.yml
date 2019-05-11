@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  fare: 1
+  cab: one
+  customer: one
+
+two:
+  fare: 1
+  cab: two
+  customer: two

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190510225232) do
+ActiveRecord::Schema.define(version: 20190511103104) do
 
   create_table "cabs", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -31,6 +31,16 @@ ActiveRecord::Schema.define(version: 20190510225232) do
     t.integer "dest_long"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "rides", force: :cascade do |t|
+    t.integer "fare"
+    t.integer "cab_id"
+    t.integer "customer_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cab_id"], name: "index_rides_on_cab_id"
+    t.index ["customer_id"], name: "index_rides_on_customer_id"
   end
 
 end
