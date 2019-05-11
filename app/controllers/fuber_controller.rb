@@ -7,26 +7,23 @@ class FuberController < ApplicationController
 		dest_lat = params[:dest_lat]
 		dest_long = params[:dest_long]
 		pink_pref = params[:pink_pref]
-		puts pink_pref
 
 		if pink_pref
-			puts "in if"
 			isPinkCabAvailable = checkPinkCabsAvailability
 			if isPinkCabAvailable
 				assigned_cab = getClosestPinkCab(src_lat, src_long)
-				render json: "success! cab assigned id #{assigned_cab}", status: :ok
+				render json: '{"message" => "success! cab assigned id #{assigned_cab}" assigned_cab}', status: :ok
 			else
-				render json: "sorry couldn't find cab", status: :unprocessable_entity
+				render json: "{sorry couldn't find cab}", status: :unprocessable_entity
 			end
 			
 		else
-			puts "in else"
 			isCabAvailable = checkCabsAvailability
 			if isCabAvailable
 				assigned_cab = getClosestCab(src_lat, src_long)
-				render json: "success! assigned cab id: #{assigned_cab}", status: :ok		
+				render json: "{success! assigned cab id}: #{assigned_cab}", status: :ok		
 			else
-				render json: "failure! sorry couldn't find cabs", status: :unprocessable_entity
+				render json: "{failure! sorry couldn't find cabs}", status: :unprocessable_entity
 			end
 		end
 	end
@@ -77,22 +74,44 @@ class FuberController < ApplicationController
 			src_long: cust_src_long,
 			dest_lat: cust_dest_lat,
 			dest_long: cust_dest_long,
-			pink_preference: cust_pink_pref
+			pink_preference: cust_pink_pref,
 			cab_id: cab_id
 			)
 		cab = Cab.find_by(id: cab_id)
 		cab.update_attributes!(is_available: false)
-		render json: "going to customer location", status: :ok
+		Ride.create!(
+			cab_id: cab.id,
+			customer_id: customer.id
+			)
+		render json: "{going to customer location}", status: :ok
 	end
 
 	def startRide
-	
-	end
-
-	def getFare
+		if(params.has_key?(:src_lat) && params.has_key?(:src_long) && params.has_key?(:cab_id) && params.has_key?(:customer_id))
+			cust_src_lat = params[:src_lat]
+			cust_src_long = params[:src_long]
+			cab_id = params[:cab_id]
+			customer_id = params[:customer_id]
+			Ride.update_attributes!(:ride_start_time) = Time.now
+			Cab.update_attributes!(lat: src_lat ,long: src_long)
+			render json: '{"message" => "Ride started!"}', status: :ok
+		else
+			render json: '{"message" => "Sorry! Unable to start ride."}', status: :unprocessable_entity
+		end
 	end
 
 	def endRide
+		if(params.has_key?(:src_lat) && params.has_key?(:src_long) && params.has_key?(:cab_id) && params.has_key?(:customer_id))
+			cust_src_lat = params[:dest_lat]
+			cust_src_long = params[:dest_long]
+			cab_id = params[:cab_id]
+			customer_id = params[:customer_id]
+			Ride.update_attributes!(:ride_end_time) = Time.now
+			Cab.update_attributes!(lat: dest_lat ,long: dest_long, is_available: true)
+			render json: '{"message" => "Ride ended!"}', status: :ok
+		else
+			render json: '{"message" => "Sorry! Unable to end ride."}', status: :unprocessable_entity
+		end
 	end
 
 end
