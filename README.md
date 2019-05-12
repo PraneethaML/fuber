@@ -31,12 +31,8 @@
 		- This database architecture is as follows for this application
 
 			- Ride belongs_to Cab & Customer
-			- Customer has_one Ride
+			- Customer has_many Rides
 			- Cab has_many Rides
-
-			- Rationale behind above architecture
-				- since we are not using any authentication for customers in this application, every customer is new when they want to book a cab. 
-				- This is not very efficient and can be improved by having `customer has_many rides` relation
 
 	- Logic of the application is written in fuber_controller
 		- fuber_app/app/controllers/fuber_controller.rb
@@ -54,7 +50,7 @@
 
 		    - getClosestCab: It takes customer's source location as parameters and 						 searches for the nearest available cab
 
-		    - acceptRide: It takes customer source and destination and their preference 			  for pink as parameters. It creates a new Ride record with the 			  given details and also creates a customer record. Also since 				  the driver accepted the trip it makes that cab as unavailable
+		    - acceptRide: It takes customer source and destination and their preference 			  for pink as parameters. It creates a new Ride record with the 			  given details. Also since the driver accepted the trip it 				  makes that cab as unavailable
 
 		    - startRide: It takes customer source location as parameters. It updates 				 Ride record with start time, and also since the cab is now 				 ready to pickup at customer place, updates cab location to 				 customer's source location
 
@@ -93,7 +89,8 @@
 				"cust_dest_lat": 2,
 				"cust_dest_long":2,
 				"pink_pref": false,
-				"cab_id": 3
+				"cab_id": 3,
+				"cust_id": 1
 			}
 			Response: 
 			{
