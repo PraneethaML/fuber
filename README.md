@@ -4,13 +4,13 @@
 * Ruby version  - 2.4.2
 
 * Instructions to run the application
-	- git clone https://github.com/PraneethaML/fuber.git
-	- cd fuber_app/
-	- bundle install
-	- rails s 
+	- `git clone https://github.com/PraneethaML/fuber.git`
+	- `cd fuber_app/`
+	- `bundle install`
+	- `rails s` 
 
 * How to run the test suite
-	-  rspec spec/request/api_spec.rb
+	-  `rspec spec/request/api_spec.rb`
 
 * Details on the code 
 		
@@ -26,7 +26,7 @@
 		- Customer: is used to store details of the customer like source, destination, preference for pink
 			- A new record for customer is created as soon as the driver accepts the ride
 
-		- Cab: We assume that some cabs are signed up with fuber already(create some sample cab records from rails console).
+		- Cab: We assume that some cabs are signed up with fuber already(create some sample cab records from rails console)
 
 		- This database architecture is as follows for this application
 
@@ -34,17 +34,17 @@
 			- Customer has_one Ride
 			- Cab has_many Rides
 
-		- Rationale behind above architecture
-			- since we are not using any authentication for customers in this application, every customer is new when they want to book a cab. 
-			- This is not very efficient and can be improved by having `customer has_many rides` relation
+			- Rationale behind above architecture
+				- since we are not using any authentication for customers in this application, every customer is new when they want to book a cab. 
+				- This is not very efficient and can be improved by having `customer has_many rides` relation
 
 	- Logic of the application is written in fuber_controller
 		- fuber_app/app/controllers/fuber_controller.rb
 
 		- Gist of each method in the controller 
-			- getAvailableCabs: searches for all the available cabs in the app and 		     				returns their cab_id to the view where it is displayed
+			- getAvailableCabs: Searches for all the available cabs in the app and 		     				returns their cab_id to the view where it is displayed
 
-			- bookCab: takes customer source and destination location and their        			   preference for pink car as  parameters as input and returns the 			   cab that is assisgned
+			- bookCab: Takes customer source and destination location and their        			   preference for pink car as input parameters and returns the 			   	   cab that is assisgned
 
 		    - checkPinkCabsAvailability: It check for available pink cabs and returns a 							boolean value based on the search
 
@@ -56,11 +56,11 @@
 
 		    - acceptRide: It takes customer source and destination and their preference 			  for pink as parameters. It creates a new Ride record with the 			  given details and also creates a customer record. Also since 				  the driver accepted the trip it makes that cab as unavailable
 
-		    - startRide: It takes customer source location as parameters. It updates Ride 			   record with start time, and also since the cab is now ready to   			 pickup at customer place, updates cab location to customer's 				 source location.
+		    - startRide: It takes customer source location as parameters. It updates 				 Ride record with start time, and also since the cab is now 				 ready to pickup at customer place, updates cab location to 				 customer's source location
 
-		    - endRide: It takes customer destination location as parameters. It updates 		   Ride record with end time, and also since the cab droped the 			   customer at their destination, it updates cab location to customer 			 destination and makes it available for the next ride. 
+		    - endRide: It takes customer destination location as parameters. It updates 		   Ride record with end time, and also since the cab dropped the 			   customer at their destination, it updates cab location to   				   customer destination and makes it available for the next ride 
 
-		    - getFare: It takes the ride id and calculates the fare accordingly based on 			the information available in ride record. 
+		    - getFare: It takes the ride_id as input and calculates the fare accordingly 			based on the information available in ride record 
 
 * Api calls
 		
@@ -78,7 +78,7 @@
 				"dest_long":0,
 				"pink_pref": false
 			}
-			output: 
+			Response: 
 			{
 			    "message": "success! assigned cab",
 			    "cab_id": "3"
@@ -95,7 +95,7 @@
 				"pink_pref": false,
 				"cab_id": 3
 			}
-			output: 
+			Response: 
 			{
 			    "message": "going to customer location",
 			    "ride_id": 14
@@ -110,7 +110,7 @@
 				"cab_id": 3,
 				"ride_id": 14	
 			}
-			output:
+			Response:
 			{
 			    "message": "Ride started!"
 			}
@@ -124,7 +124,7 @@
 				"cab_id": 3,
 				"ride_id": 14	
 			}
-			output:
+			Response:
 			{
 			    "message": "Ride ended!"
 			}
@@ -135,7 +135,7 @@
 			{
 				"ride_id": 14
 			}
-			output:
+			Response:
 			{
 			    "message": "You owe total 7 dogecoins",
 			    "extra_cost": 0
@@ -144,20 +144,18 @@
 * Future Enhancements 
 	
 	- Frontend:
-		- Add screens for customer to book the cab
+		- Add screen for customer to book the cab
 			- On clicking the `book cab` button it should trigger /book_cab api
 		
-		- Add screen for Driver to accept, start, end the ride and get fare 
-			- Have the buttons for all those actions which triggers their api's respectively
+		- Add screens for Driver to accept, start, end the ride and get fare 
+			- Have the buttons for all those actions which triggers their api    	respectively
 
-		- Add background image of a graph on `available_cabs` view and show the cabs at their respective locations
+		- Add background image of a map(using google maps api) on `available_cabs` view and show the cabs and customer at their respective locations
 
 	- Backend 
-		- Change the Architecture of the application to 
-			Customer has_many rides
-			In this way we will be able to retrieve all the past rides of a customer 
+		- Enable customer and driver authentication
 
-		- When the data for cabs is more it becomes inefficient to calculate the distance of all available cabs and then find the closest. Instead we can put a radius and seach and get closest cabs in that radius.
+		- When the data for cabs is more, it becomes inefficient to calculate the distance of all available cabs and then find the closest. Instead we can put a limit on radius and search closest cabs in that radius.
 
 
 * ...
