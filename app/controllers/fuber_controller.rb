@@ -61,7 +61,7 @@ class FuberController < ApplicationController
 	end
 
 	def getClosestPinkCab(src_lat,src_long)
-		available_pink_cabs = Cab.where(:is_pink => true)
+		available_pink_cabs = Cab.where(:is_pink => true, :is_available => true)
 		distance = {}
 		for cab in available_pink_cabs
 			lat_diff_sq = (cab.lat.to_i - src_lat.to_i) ** 2
