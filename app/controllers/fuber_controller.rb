@@ -84,6 +84,7 @@ class FuberController < ApplicationController
 	end
 
 	def acceptRide
+		cust_id = params[:cust_id]
 		cust_src_lat = params[:src_lat]
 		cust_src_long = params[:src_long]
 		cust_dest_lat = params[:dest_lat]
@@ -91,13 +92,6 @@ class FuberController < ApplicationController
 		cust_pink_pref = params[:pink_pref]
 		cab_id = params[:cab_id]
 		
-		customer = Customer.create!(
-			src_lat: cust_src_lat,
-			src_long: cust_src_long,
-			dest_lat: cust_dest_lat,
-			dest_long: cust_dest_long,
-			cab_id: cab_id
-			)
 		cab = Cab.find_by(id: cab_id)
 		cab.update_attributes!(is_available: false)
 
@@ -107,7 +101,7 @@ class FuberController < ApplicationController
 
 		ride = Ride.create!(
 			cab_id: cab.id,
-			customer_id: customer.id,
+			customer_id: cust_id,
 			dist_travelled: distance_to_cover,
 			pink_pref: cust_pink_pref
 			)

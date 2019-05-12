@@ -26,7 +26,8 @@ module ApiParams
       "cust_dest_lat" => 2,
       "cust_dest_long" => 2,
       "pink_pref" => false,
-      "cab_id" => 1
+      "cab_id" => 1,
+      "cust_id" => 1
     }
   end
 

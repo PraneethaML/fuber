@@ -1,3 +1,3 @@
 class Customer < ApplicationRecord
-	has_one :ride
+	has_many :rides
 end
