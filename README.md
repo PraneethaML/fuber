@@ -152,9 +152,6 @@
 	- Backend 
 		- Enable customer and driver authentication
 
-		- When the data for cabs is more, it becomes inefficient to calculate the distance of all available cabs and then find the closest. Instead we can put a limit on radius and search closest cabs in that radius.
-
-
-* ...
+		- When the data for cabs is more, it becomes inefficient to calculate the distance of all available cabs and then find the closest. Instead we can put a limit on radius and search closest cabs in that radius
 
 # fuber
