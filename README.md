@@ -30,9 +30,9 @@
 
 		- This database architecture is as follows for this application
 
-			Ride belongs_to Cab & Customer
-			Customer has_one Ride
-			Cab has_many Rides
+			- Ride belongs_to Cab & Customer
+			- Customer has_one Ride
+			- Cab has_many Rides
 
 		- Rationale behind above architecture
 			- since we are not using any authentication for customers in this application, every customer is new when they want to book a cab. 
