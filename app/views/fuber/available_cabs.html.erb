@@ -1,0 +1,11 @@
+<div class="container">
+  <h1>Welcome to fuber!</h1>
+  <h3>Available cabs</h3>
+  <% if !@cabs.nil? %>
+      <% @cabs.each do |cab| %>
+          <%= image_tag("fuber.png", size: "40") %><%= cab.id %>
+      <% end %>
+    <% else %>
+      <h3> Sorry no cabs Available</h3>
+    <% end %>  
+</div>

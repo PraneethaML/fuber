@@ -1,15 +1,20 @@
 class FuberController < ApplicationController
 	protect_from_forgery with: :null_session
 
+	
 	def getAvailableCabs
-		cabs = Cab.where(:is_available => true)
-		total_available_cabs = cabs.count
-		cab_ids = cabs.pluck(:id)
-		if total_available_cabs > 0
-			render json: {"message" => "#{total_available_cabs} found near you", "cab_ids" => "#{cab_ids}"}.to_json, status: :ok
-		else
-			render json: {"message" => "No cabs found near you"}.to_json, status: :unprocessable_entity
-		end
+		@cabs = Cab.where(:is_available => true)
+		render 'available_cabs'
+
+		# for api use below code 
+		
+		# total_available_cabs = cabs.count
+		# cab_ids = cabs.pluck(:id)
+		# if total_available_cabs > 0
+		# 	render json: {"message" => "#{total_available_cabs} found near you", "cab_ids" => "#{cab_ids}"}.to_json, status: :ok
+		# else
+		# 	render json: {"message" => "No cabs found near you"}.to_json, status: :unprocessable_entity
+		# end
 		
 	end
 
